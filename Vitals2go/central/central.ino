@@ -52,7 +52,7 @@ void loop() {
     Serial.print(peripheral.advertisedServiceUuid());
     Serial.println();
 
-    if (peripheral.localName() != "LED") {
+    if (peripheral.localName() != "Vitals 2 Go") {
       return;
     }
 
@@ -88,53 +88,31 @@ void controlLed(BLEDevice peripheral) {
   }
 
   // retrieve the LED characteristic
-  BLECharacteristic ledCharacteristic = peripheral.characteristic("19b10001-e8f2-537e-4f6c-d104768a1214");
+  BLECharacteristic pulseOxChar = peripheral.characteristic("19B12A59-E8F2-537E-4F6C-D104768A1214");
+//  BLECharacteristic bloodPressureChar = peripheral.characteristic("2A35");
+//  BLECharacteristic heartRateChar = peripheral.characteristic("2A37");
 
-  if (!ledCharacteristic) {
-    Serial.println("Peripheral does not have LED characteristic!");
+
+  if (!pulseOxChar) {
+    Serial.println("Peripheral does not have the characteristics!");
     peripheral.disconnect();
     return;
-  } else if (!ledCharacteristic.canWrite()) {
-    Serial.println("Peripheral does not have a writable LED characteristic!");
+  } else if (!pulseOxChar.canRead()) {
+    Serial.println("Peripheral cannot be read!");
     peripheral.disconnect();
     return;
   }
+  
 
   while (peripheral.connected()) {
     // while the peripheral is connected
     delay(200);
-    if (buttonState == LOW) {
-      buttonState = HIGH;
-    } else {
-      buttonState = LOW;
-    }
+    byte newVal;
+    pulseOxChar.readValue(newVal);
 //    buttonState = !buttonState;
-    Serial.print("Button = ");
-    Serial.println(buttonState);
-    if (buttonState) {
-      ledCharacteristic.writeValue((byte)0x01);
-    } else {
-      ledCharacteristic.writeValue((byte)0x00);
-    }
-//    // read the button pin
-//    int buttonState = digitalRead(buttonPin);
-//
-//    if (oldButtonState != buttonState) {
-//      // button changed
-//      oldButtonState = buttonState;
-//
-//      if (buttonState) {
-//        Serial.println("button pressed");
-//
-//        // button is pressed, write 0x01 to turn the LED on
-//        ledCharacteristic.writeValue((byte)0x01);
-//      } else {
-//        Serial.println("button released");
-//
-//        // button is released, write 0x00 to turn the LED off
-//        ledCharacteristic.writeValue((byte)0x00);
-//      }
-//    }
+    Serial.print("Val = ");
+    Serial.println(newVal);
+    
   }
 
   Serial.println("Peripheral disconnected");
