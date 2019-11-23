@@ -52,7 +52,7 @@ void loop() {
     Serial.print(peripheral.advertisedServiceUuid());
     Serial.println();
 
-    if (peripheral.localName() != "LED") {
+    if (peripheral.localName() != "Vitals 2 Go") {
       return;
     }
 
