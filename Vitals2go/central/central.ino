@@ -20,13 +20,14 @@
 
 // variables for button
 const int buttonPin = 2;
+int outputPin = 14;
 int buttonState = LOW;
 long previousMillis = 0; 
 int ledVal = LOW;
 
 void setup() {
   Serial.begin(9600);
-  while (!Serial);
+//  while (!Serial);
 
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(buttonPin, INPUT);
@@ -100,17 +101,13 @@ void controlLed(BLEDevice peripheral) {
     return;
   }
 
-  // retrieve the LED characteristic
-  BLECharacteristic pulseOxChar = peripheral.characteristic("19B12A59-E8F2-537E-4F6C-D104768A1214");
-//  BLECharacteristic bloodPressureChar = peripheral.characteristic("2A35");
-//  BLECharacteristic heartRateChar = peripheral.characteristic("2A37");
+  BLECharacteristic periChar = peripheral.characteristic("19B12A59-E8F2-537E-4F6C-D104768A1214");
 
-
-  if (!pulseOxChar) {
+  if (!periChar) {
     Serial.println("Peripheral does not have the characteristics!");
     peripheral.disconnect();
     return;
-  } else if (!pulseOxChar.canRead()) {
+  } else if (!periChar.canRead()) {
     Serial.println("Peripheral cannot be read!");
     peripheral.disconnect();
     return;
@@ -121,11 +118,12 @@ void controlLed(BLEDevice peripheral) {
     
     // while the peripheral is connected
     delay(200);
-//    byte newVal;
-//    pulseOxChar.readValue(newVal);
+    byte newVal;
+    periChar.readValue(newVal);
 //    buttonState = !buttonState;
-    Serial.print("Val = ");
-    Serial.println("123");
+    analogWrite(outputPin, newVal);
+//    Serial.print("Val = ");
+    Serial.println(newVal);
     
   }
   

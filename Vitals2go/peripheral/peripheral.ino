@@ -24,10 +24,9 @@ BLEService patientService("19B1181C-E8F2-537E-4F6C-D104768A1214");
 
 
 // BLE Characteristics
-BLEByteCharacteristic pulseOxChar("19B12A59-E8F2-537E-4F6C-D104768A1214", BLERead);
-//BLEUnsignedCharCharacteristic bloodPressureChar("2A35", BLERead );
-//BLEUnsignedCharCharacteristic heartRateChar("2A37", BLERead);
+BLEByteCharacteristic analogChar("19B12A59-E8F2-537E-4F6C-D104768A1214", BLERead);
 
+const int maxBytes = 512;
 int sensorPin = 16;
 int outputPin = 14;
 int oldBatteryLevel = 0; 
@@ -54,22 +53,15 @@ void setup() {
   */
   BLE.setLocalName("Vitals 2 Go");
   BLE.setAdvertisedService(patientService); 
-  patientService.addCharacteristic(pulseOxChar); 
-//  patientService.addCharacteristic(bloodPressureChar);
-//  patientService.addCharacteristic(heartRateChar);
+  patientService.addCharacteristic(analogChar); 
   BLE.addService(patientService); 
-//  pulseOxChar.writeValue((byte)0x00); 
-//  bloodPressureChar.writeValue(1); 
-//  heartRateChar.writeValue(2); 
+
 
   /* Start advertising BLE.  It will start continuously transmitting BLE
      advertising packets and will be visible to remote BLE central devices
      until it receives a new connection */
 
-  // start advertising
   BLE.advertise();
-
-  Serial.println("Bluetooth device active, waiting for connections...");
 }
 
 void loop() {
@@ -77,12 +69,7 @@ void loop() {
   BLEDevice central = BLE.central();
 
   if (central) {
-//    Serial.print("Connected to central: ");
-    // print the central's BT address:
-//    Serial.println(central.address());
-    // turn on the LED to indicate the connection:
     digitalWrite(LED_BUILTIN, HIGH);
-
     while (central.connected()) {
       long currentMillis = millis();
       if (currentMillis - previousMillis >= 200) {
@@ -92,9 +79,8 @@ void loop() {
     }
     // when the central disconnects, turn off the LED:
     digitalWrite(LED_BUILTIN, LOW);
-//    Serial.print("Disconnected from central: ");
-//    Serial.println(central.address());
   }
+  //blink while not connected
   long currentMillis = millis();
   if (currentMillis - previousMillis >= 200) {
     previousMillis = currentMillis;
@@ -112,11 +98,17 @@ void updateAnalog() {
   
   int analogIn = analogRead(sensorPin);
   int analogOut = map(analogIn, 0, 1023, 0, 255);
-  analogWrite(sensorPin-2, analogOut);
-
-  Serial.print("Analog in: "); // print it
-  Serial.println(analogIn);
-    
+  int num = 1234;
+  char cstr[maxBytes];
+  itoa(num, cstr, 10);
+  analogWrite(outputPin, analogOut);
+  analogChar.writeValue((byte)analogOut);
+  
+//  Serial.print("Analog in: "); // print it
+//  Serial.println(analogIn);
+//  Serial.print("Analog out: "); // print it
+//  Serial.println((byte)analogOut);
+  
 //    byte tempval = 0xa4;
 //    pulseOxChar.writeValue(analogOut);  // and update the battery level characteristics
     
