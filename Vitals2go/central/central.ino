@@ -117,7 +117,7 @@ void controlLed(BLEDevice peripheral) {
   while (peripheral.connected()) {
     
     // while the peripheral is connected
-    delay(200);
+//    delay(200);
     byte newVal;
     periChar.readValue(newVal);
 //    buttonState = !buttonState;
