@@ -21,12 +21,14 @@
 // variables for button
 const int buttonPin = 2;
 int buttonState = LOW;
+long previousMillis = 0; 
+int ledVal = LOW;
 
 void setup() {
   Serial.begin(9600);
   while (!Serial);
 
-  // configure the button pin as input
+  pinMode(LED_BUILTIN, OUTPUT);
   pinMode(buttonPin, INPUT);
 
   // initialize the BLE hardware
@@ -36,6 +38,11 @@ void setup() {
 
   // start scanning for peripherals
   BLE.scanForUuid("19b1181C-e8f2-537e-4f6c-d104768a1214");
+}
+
+void switchLED() {
+  digitalWrite(LED_BUILTIN, ledVal);
+  ledVal = !ledVal;
 }
 
 void loop() {
@@ -53,6 +60,7 @@ void loop() {
     Serial.println();
 
     if (peripheral.localName() != "Vitals 2 Go") {
+      Serial.println("Couldn't find Service");
       return;
     }
 
@@ -64,12 +72,17 @@ void loop() {
     // peripheral disconnected, start scanning again
     BLE.scanForUuid("19b1181C-e8f2-537e-4f6c-d104768a1214");
   }
+//  long currentMillis = millis();
+//  if (currentMillis - previousMillis >= 200) {
+//    previousMillis = currentMillis;
+//    switchLED();
+//  }
 }
 
 void controlLed(BLEDevice peripheral) {
   // connect to the peripheral
   Serial.println("Connecting ...");
-
+  
   if (peripheral.connect()) {
     Serial.println("Connected");
   } else {
@@ -103,17 +116,19 @@ void controlLed(BLEDevice peripheral) {
     return;
   }
   
-
+  digitalWrite(LED_BUILTIN, HIGH);
   while (peripheral.connected()) {
+    
     // while the peripheral is connected
     delay(200);
-    byte newVal;
-    pulseOxChar.readValue(newVal);
+//    byte newVal;
+//    pulseOxChar.readValue(newVal);
 //    buttonState = !buttonState;
     Serial.print("Val = ");
-    Serial.println(newVal);
+    Serial.println("123");
     
   }
-
+  
+  digitalWrite(LED_BUILTIN, LOW);
   Serial.println("Peripheral disconnected");
 }

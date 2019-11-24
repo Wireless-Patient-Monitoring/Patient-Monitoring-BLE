@@ -24,7 +24,7 @@ BLEService patientService("19B1181C-E8F2-537E-4F6C-D104768A1214");
 
 
 // BLE Characteristics
-BLEUnsignedCharCharacteristic pulseOxChar("19B12A59-E8F2-537E-4F6C-D104768A1214", BLERead);
+BLEByteCharacteristic pulseOxChar("19B12A59-E8F2-537E-4F6C-D104768A1214", BLERead);
 //BLEUnsignedCharCharacteristic bloodPressureChar("2A35", BLERead );
 //BLEUnsignedCharCharacteristic heartRateChar("2A37", BLERead);
 
@@ -32,6 +32,7 @@ int sensorPin = 16;
 int outputPin = 14;
 int oldBatteryLevel = 0; 
 long previousMillis = 0; 
+int ledVal = LOW;
 
 void setup() {
 //  Serial.begin(9600);    // initialize serial communication
@@ -57,7 +58,7 @@ void setup() {
 //  patientService.addCharacteristic(bloodPressureChar);
 //  patientService.addCharacteristic(heartRateChar);
   BLE.addService(patientService); 
-  pulseOxChar.writeValue((byte)0x00); 
+//  pulseOxChar.writeValue((byte)0x00); 
 //  bloodPressureChar.writeValue(1); 
 //  heartRateChar.writeValue(2); 
 
@@ -84,7 +85,6 @@ void loop() {
 
     while (central.connected()) {
       long currentMillis = millis();
-      // if 200ms have passed, check the battery level:
       if (currentMillis - previousMillis >= 200) {
         previousMillis = currentMillis;
         updateAnalog();
@@ -95,6 +95,16 @@ void loop() {
 //    Serial.print("Disconnected from central: ");
 //    Serial.println(central.address());
   }
+  long currentMillis = millis();
+  if (currentMillis - previousMillis >= 200) {
+    previousMillis = currentMillis;
+    switchLED();
+  }
+}
+
+void switchLED() {
+  digitalWrite(LED_BUILTIN, ledVal);
+  ledVal = !ledVal;
 }
 
 void updateAnalog() {
@@ -104,11 +114,11 @@ void updateAnalog() {
   int analogOut = map(analogIn, 0, 1023, 0, 255);
   analogWrite(sensorPin-2, analogOut);
 
-//    Serial.print("Analog in: "); // print it
-//    Serial.println(analogIn);
+  Serial.print("Analog in: "); // print it
+  Serial.println(analogIn);
     
 //    byte tempval = 0xa4;
-    pulseOxChar.writeValue(analogOut);  // and update the battery level characteristics
+//    pulseOxChar.writeValue(analogOut);  // and update the battery level characteristics
     
 }
 
