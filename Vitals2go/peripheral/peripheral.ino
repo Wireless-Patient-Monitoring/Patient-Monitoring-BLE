@@ -72,7 +72,7 @@ void loop() {
     digitalWrite(LED_BUILTIN, HIGH);
     while (central.connected()) {
       long currentMillis = millis();
-      if (currentMillis - previousMillis >= 200) {
+      if (currentMillis - previousMillis >= 10) {
         previousMillis = currentMillis;
         updateAnalog();
       }
@@ -98,11 +98,8 @@ void updateAnalog() {
   
   int analogIn = analogRead(sensorPin);
   int analogOut = map(analogIn, 0, 1023, 0, 255);
-  int num = 1234;
-  char cstr[maxBytes];
-  itoa(num, cstr, 10);
   analogWrite(outputPin, analogOut);
-  analogChar.writeValue((byte)analogOut);
+  analogChar.writeValue((byte)analogOut); 
   
 //  Serial.print("Analog in: "); // print it
 //  Serial.println(analogIn);
