@@ -21,13 +21,12 @@
 // variables for button
 const int buttonPin = 2;
 int outputPin = 14;
-int buttonState = LOW;
 long previousMillis = 0; 
 int ledVal = LOW;
 
 void setup() {
   Serial.begin(9600);
-//  while (!Serial);
+  while (!Serial);
 
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(buttonPin, INPUT);
@@ -73,11 +72,7 @@ void loop() {
     // peripheral disconnected, start scanning again
     BLE.scanForUuid("19b1181C-e8f2-537e-4f6c-d104768a1214");
   }
-//  long currentMillis = millis();
-//  if (currentMillis - previousMillis >= 200) {
-//    previousMillis = currentMillis;
-//    switchLED();
-//  }
+
 }
 
 void controlLed(BLEDevice peripheral) {
@@ -116,8 +111,7 @@ void controlLed(BLEDevice peripheral) {
   digitalWrite(LED_BUILTIN, HIGH);
   while (peripheral.connected()) {
     
-    // while the peripheral is connected
-//    delay(200);
+
     byte newVal;
     periChar.readValue(newVal);
 //    buttonState = !buttonState;
