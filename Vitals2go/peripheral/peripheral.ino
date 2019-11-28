@@ -24,7 +24,7 @@ BLEService patientService("19B1181C-E8F2-537E-4F6C-D104768A1214");
 
 
 // BLE Characteristics
-BLELongCharacteristic analogChar("19B12A59-E8F2-537E-4F6C-D104768A1214", BLERead | BLEWrite);
+BLEUnsignedLongCharacteristic analogChar("19B12A59-E8F2-537E-4F6C-D104768A1214", BLERead | BLEWrite);
 
 //Waveform is scaled for a 12-bit D/A converter (0 .. 4096)
 
@@ -98,10 +98,12 @@ int outputPin = 14;
 long previousMillis = 0; 
 long blinkMillis = 0;
 int ledVal = LOW;
+byte iter1 = 0;
+byte iter2 = 0;
 
 void setup() {
   Serial.begin(9600);    // initialize serial communication
-  while (!Serial);
+//  while (!Serial);
   pinMode(LED_BUILTIN, OUTPUT); // initialize the built-in LED pin to indicate when a central is connected
   pinMode(whitePin, INPUT);
   pinMode(blackPin, INPUT);
@@ -134,16 +136,65 @@ void setup() {
   BLE.advertise();
 }
 
+int scaleVal(int val) {
+  return map(val, 0, 4096, 0, 255);
+}
+
 void loop() {
   // wait for a BLE central
   BLEDevice central = BLE.central();
   Serial.println("searching for Central");
+  
+  //  for (byte i = 0; i < sizeof(y_data) - 1; i++) {
+//    analogChar.writeValue((int)y_data[i]);
+//    Serial.println(y_data[i]);
+//    delay(200);
+//  }
   if (central) {
     digitalWrite(LED_BUILTIN, HIGH);
     Serial.println("connected");
+    int portion = 0;
+    int iter = 0;
     while (central.connected()) {
-      Serial.println("Staying connected");
-      updateAnalog();
+        delay(1);
+        
+        if (portion == 0) {
+           int combined = scaleVal(y_data[iter]);
+          analogChar.writeValue((long)combined); 
+          Serial.println(iter);
+          iter++;
+          if (iter > 540) {
+            Serial.print("reset");
+            portion = 1;
+            iter = 0;
+          }
+        }
+ 
+        if(portion == 1) {
+          analogChar.writeValue((long)scaleVal(943));
+          Serial.println(943);
+          iter++;
+          if (iter > 457) {
+            portion = 0;
+            iter = 0;
+          }
+        }
+
+
+//        if (portion == 0) {
+//          analogChar.writeValue((long)scaleVal(943));
+//          iter2++;
+//          if (iter2 > 457) {
+//            portion = 1;
+//          }
+//        } else {
+//          int combined = scaleVal(y_data[iter1]);
+//          analogChar.writeValue((long)combined); 
+//          iter1++;
+//          if (iter1 > sizeof(y_data) - 1) {
+//            portion = 0;
+//          }
+//        }
     }
     Serial.println("disconnected");
     // when the central disconnects, turn off the LED:
@@ -162,49 +213,14 @@ void switchLED() {
   ledVal = !ledVal;
 }
 
-int scaleVal(int val) {
-  return map(val, 0, 4096, 0, 255);
-}
-
-void updateAnalog() {
-    
+//
+//
+//void updateAnalog() {
+//    
 //  for (int j = 0; j < 457; j++) {
-//    Serial.println(938);
-//    analogChar.writeValue((int)938);
+//    int combined = scaleVal(943);
+//    analogChar.writeValue((long)combined); 
 //    delay(200);
 //  }
-  // should be the other 543 data points
-//  for (byte i = 0; i < sizeof(y_data) - 1; i++) {
-//    analogChar.writeValue((int)y_data[i]);
-//    Serial.println(y_data[i]);
-//    delay(200);
-//  }
-
-//  // Read the current voltage level on the A2 analog input pin
-//  
-  int whiteVal = map(analogRead(whitePin), 0, 1023, 0, 255);
-  int blackVal = map(analogRead(blackPin), 0, 1023, 0, 255);
-  int redVal = map(analogRead(redPin), 0, 1023, 0, 255);
-  
-//  whiteVal = 0x01;
-//  blackVal = 0x35;
-//  redVal = 0xFF;
-//  int analogOut = map(analogIn, 0, 1023, 0, 255);
-
-  int combined = (whiteVal << 16) | (blackVal << 8) | redVal;
-
-//   analogChar.writeValue((long)y_data[3]); 
-  analogChar.writeValue((long)combined); 
-//  Serial.println(testSignal);
-//  analogWrite(outputPin, analogOut);
-//  analogChar.writeValue((byte)analogOut); 
-  
-//  Serial.print("Analog in: "); // print it
-//  Serial.println(analogIn);
-//  Serial.print("Analog out: "); // print it
-//  Serial.println((byte)analogOut);
-  
-//    byte tempval = 0xa4;
-//    pulseOxChar.writeValue(analogOut);  // and update the battery level characteristics
-    
-}
+//
+//}

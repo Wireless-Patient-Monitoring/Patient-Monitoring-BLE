@@ -20,13 +20,13 @@
 
 // variables for button
 const int buttonPin = 2;
-int outputPin = 14;
+int outputPin = 11;
 long previousMillis = 0; 
 int ledVal = LOW;
 
 void setup() {
   Serial.begin(9600);
-  while (!Serial);
+//  while (!Serial);
 
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(buttonPin, INPUT);
@@ -112,7 +112,7 @@ void controlLed(BLEDevice peripheral) {
   while (peripheral.connected()) {
     
 
-    byte newVal;
+    long newVal;
     periChar.readValue(newVal);
 //    buttonState = !buttonState;
     analogWrite(outputPin, newVal);
